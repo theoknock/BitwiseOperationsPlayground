@@ -248,7 +248,7 @@ static void (^print_debug)(const char *) = ^ (const char * str) {
 };
 
 static const UIButton * (^buttons[5])(void);
-static const UIButton * (^(^(^button_group)(CaptureDeviceConfigurationControlPropertyBitMask))(CaptureDeviceConfigurationControlProperty))(void) =  ^ (CaptureDeviceConfigurationControlPropertyBitMask property_bit_mask) {
+static const UIButton * (^(^(^button_group)(CaptureDeviceConfigurationControlPropertyBitMask, CaptureDeviceConfigurationControlSelectedPropertyBitMask, CaptureDeviceConfigurationControlHiddenPropertyBitMask))(CaptureDeviceConfigurationControlProperty))(void) =  ^ (CaptureDeviceConfigurationControlPropertyBitMask property_bit_mask, CaptureDeviceConfigurationControlSelectedPropertyBitMask selected_property_bit_mask, CaptureDeviceConfigurationControlHiddenPropertyBitMask hidden_property_bit_mask) {
     print_debug("INIT BUTTONS");
     for (int property_tag = 0; property_tag < 5; property_tag++) {
         __block UIButton * (^button)(void);
@@ -380,7 +380,7 @@ static uint8_t property_bit_vector_[5][3];
     //
     //    }
     
-    UIButton * (^(^bg)(CaptureDeviceConfigurationControlProperty))(void) = button_group(property_bit_vector);
+    UIButton * (^(^bg)(CaptureDeviceConfigurationControlProperty))(void) = button_group(property_bit_vector, selected_property_bit_vector, hidden_property_bit_vector);
     for (CaptureDeviceConfigurationControlProperty property = CaptureDeviceConfigurationControlPropertyTorchLevel; property < CaptureDeviceConfigurationControlPropertyNone; property++) {
         [self.view addSubview:bg(property)()];
             [bg(property)() setCenter:CGPointMake(CGRectGetMidX(bg(property)().superview.frame), CGRectGetMidY(bg(property)().superview.frame) + (bg(property)().frame.size.height * property) + 13.0)];
