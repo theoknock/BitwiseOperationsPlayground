@@ -157,6 +157,50 @@ static  CaptureDeviceConfigurationControlHiddenPropertyBitVector * const hidden_
  - masks on all property bits
  */
 
+static CaptureDeviceConfigurationControlPropertyBitVector (^mask_property_bit_vector)(CaptureDeviceConfigurationControlPropertyBitMask) = ^ CaptureDeviceConfigurationControlPropertyBitVector (CaptureDeviceConfigurationControlPropertyBitMask property_bit_mask) {
+    property_bit_vector = property_bit_vector | property_bit_mask;
+    return *property_bit_vector_ptr;
+};
+
+/*
+ Possible bit masks
+ - CaptureDeviceConfigurationControlSelectedPropertyBit
+ - select a new property/deselect old property: mask on the property bit (if not already) while masking off any other selected bit (if any)
+ - 0b00000
+ - deselect a property
+ */
+
+static CaptureDeviceConfigurationControlSelectedPropertyBitVector (^mask_selected_property_bit_vector)(CaptureDeviceConfigurationControlSelectedPropertyBit) = ^ CaptureDeviceConfigurationControlSelectedPropertyBitVector (CaptureDeviceConfigurationControlSelectedPropertyBit selected_property_bit) {
+    
+    /*    CaptureDeviceConfigurationControlSelectedPropertyBitMask (^selected_property_bit_mask)(CaptureDeviceConfigurationControlSelectedPropertyBitMask mask) {
+     //        // pass as a parameter to the hidden bit vector block for a calculation
+     //        // execute the return block for the assignment
+     //        return (selected_property_bit_vector & selected_property_bit);
+     //    };
+     */
+    selected_property_bit_vector   = selected_property_bit_vector & (0 << 0 | 0 << 1 | 0 << 2 | 0 << 3 | 0 << 4);
+    selected_property_bit_vector   = selected_property_bit_vector | selected_property_bit;
+    hidden_property_bit_vector    ^= ~((selected_property_bit_vector & ~selected_property_bit_vector));
+    /* toggle hidden bit vector ^ using an ~inverted selected bit vector &= ~not the selected bit
+     // inverted selected bit vector = (selected_property_bit_vector & = ~selected_property_bit_vector)
+     // toggle hidden bits = hidden_property_bit_vector ^
+     // exclude selected bit from toggle = ~selected_property_bit_vector */
+    return *selected_property_bit_vector_ptr;
+};
+
+/*
+ Possible bit masks
+ - selected_property_bit_vector
+ - toggle every hidden bit using an inverted selected bit vector, but not the selected bit
+ -
+ */
+
+static CaptureDeviceConfigurationControlHiddenPropertyBitVector (^mask_hidden_property_bit_vector)(CaptureDeviceConfigurationControlSelectedPropertyBitVector) = ^ (CaptureDeviceConfigurationControlSelectedPropertyBitMask selected_property_bit_mask) {
+    return *hidden_property_bit_vector_ptr;
+    /*    hidden_property_bit_vector ^= ~selected_property_bit_mask; // moved temporarily to mask_selected_property_bit_vector
+     //
+     //    return *hidden_property_bit_vector_ptr; */
+};
 
 // Button rendering
 
@@ -250,11 +294,9 @@ static void (^print_debug)(const char *) = ^ (const char * str) {
 static const UIButton * (^buttons[5])(void);
 static const UIButton * (^(^(^button_group)(CaptureDeviceConfigurationControlPropertyBitMask, CaptureDeviceConfigurationControlSelectedPropertyBitMask, CaptureDeviceConfigurationControlHiddenPropertyBitMask))(CaptureDeviceConfigurationControlProperty))(void) =  ^ (CaptureDeviceConfigurationControlPropertyBitMask property_bit_mask, CaptureDeviceConfigurationControlSelectedPropertyBitMask selected_property_bit_mask, CaptureDeviceConfigurationControlHiddenPropertyBitMask hidden_property_bit_mask) {
     for (unsigned int property_tag = 0; property_bit_vector; property_bit_vector >>= 1) {
-        printf("property_tag == %d\n", property_tag);
         
         __block UIButton * (^button)(void);
         button = ^{
-            print_debug("\t\tINIT BUTTON");
             UIButton * button;
             [button = [UIButton new] setTag:property_tag];
             [button setBackgroundColor:[UIColor clearColor]];
@@ -264,77 +306,31 @@ static const UIButton * (^(^(^button_group)(CaptureDeviceConfigurationControlPro
             [button setUserInteractionEnabled:TRUE];
             
             void (^eventHandlerBlock)(void) = ^{
-                print_debug("");
+                selected_property_bit_vector &= ~(selected_property_bit_vector);
+                selected_property_bit_vector |= property_tag;
                 for (int property = 0; property < 5; property++) {
-                    [buttons[property]() setSelected:(property == button.tag)];
+                    [buttons[property]() setSelected:(selected_property_bit_vector | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)) == (CaptureDeviceConfigurationControlSelectedPropertyBit)(property)];//]& (CaptureDeviceConfigurationControlSelectedPropertyBit)buttons[property]().tag))];
                 };
             };
             objc_setAssociatedObject(button, @selector(invoke), eventHandlerBlock, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             [button addTarget:eventHandlerBlock action:@selector(invoke) forControlEvents:UIControlEventTouchUpInside];
             
             return ^ UIButton * (void) {
-                print_debug("");
-                    return button;
-                };
+                return button;
+            };
         }();
         buttons[property_tag] = button;
         property_tag += property_bit_vector & 1;
         
     }
-    print_debug("");
     
     return ^ (CaptureDeviceConfigurationControlProperty property_index) {
-        print_debug("");
         return buttons[property_index];
     };
 };
-static UIButton * (^(^property_buttons)(CaptureDeviceConfigurationControlProperty))(void);
-//static UIButton * (^(^button)(CaptureDeviceConfigurationControlProperty))(void);
+static UIButton * (^(^property_button)(CaptureDeviceConfigurationControlProperty))(void);
 
 
-static CaptureDeviceConfigurationControlPropertyBitVector (^mask_property_bit_vector)(CaptureDeviceConfigurationControlPropertyBitMask) = ^ CaptureDeviceConfigurationControlPropertyBitVector (CaptureDeviceConfigurationControlPropertyBitMask property_bit_mask) {
-    property_bit_vector = property_bit_vector | property_bit_mask;
-    return *property_bit_vector_ptr;
-};
-
-/*
- Possible bit masks
- - CaptureDeviceConfigurationControlSelectedPropertyBit
- - select a new property/deselect old property: mask on the property bit (if not already) while masking off any other selected bit (if any)
- - 0b00000
- - deselect a property
- */
-
-static CaptureDeviceConfigurationControlSelectedPropertyBitVector (^mask_selected_property_bit_vector)(CaptureDeviceConfigurationControlSelectedPropertyBit) = ^ CaptureDeviceConfigurationControlSelectedPropertyBitVector (CaptureDeviceConfigurationControlSelectedPropertyBit selected_property_bit) {
-    
-    /*    CaptureDeviceConfigurationControlSelectedPropertyBitMask (^selected_property_bit_mask)(CaptureDeviceConfigurationControlSelectedPropertyBitMask mask) {
-     //        // pass as a parameter to the hidden bit vector block for a calculation
-     //        // execute the return block for the assignment
-     //        return (selected_property_bit_vector & selected_property_bit);
-     //    };
-     */
-    selected_property_bit_vector   = selected_property_bit_vector & selected_property_bit;
-    hidden_property_bit_vector    ^= ~((selected_property_bit_vector & ~selected_property_bit_vector));
-    /* toggle hidden bit vector ^ using an ~inverted selected bit vector &= ~not the selected bit
-     // inverted selected bit vector = (selected_property_bit_vector & = ~selected_property_bit_vector)
-     // toggle hidden bits = hidden_property_bit_vector ^
-     // exclude selected bit from toggle = ~selected_property_bit_vector */
-    return *selected_property_bit_vector_ptr;
-};
-
-/*
- Possible bit masks
- - selected_property_bit_vector
- - toggle every hidden bit using an inverted selected bit vector, but not the selected bit
- -
- */
-
-static CaptureDeviceConfigurationControlHiddenPropertyBitVector (^mask_hidden_property_bit_vector)(CaptureDeviceConfigurationControlSelectedPropertyBitVector) = ^ (CaptureDeviceConfigurationControlSelectedPropertyBitMask selected_property_bit_mask) {
-    return *hidden_property_bit_vector_ptr;
-    /*    hidden_property_bit_vector ^= ~selected_property_bit_mask; // moved temporarily to mask_selected_property_bit_vector
-     //
-     //    return *hidden_property_bit_vector_ptr; */
-};
 
 @interface ViewController ()
 
@@ -358,24 +354,24 @@ static CaptureDeviceConfigurationControlHiddenPropertyBitVector (^mask_hidden_pr
  总结规则: 有1则为1   即:一真则真
  https://www.jianshu.com/p/9810944d6d47
  */
-static uint8_t property_bit_vector_[5][3];
+//static uint8_t property_bit_vector_[5][3];
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-//    print_debug("Reading property_bit_vector...");
-//    for (unsigned int property_tag = 0; property_bit_vector; property_bit_vector >>= 1) {
-//        print_debug("property_tag");
-//        property_tag += property_bit_vector & 1;
-//    }
+    //    print_debug("Reading property_bit_vector...");
+    //    for (unsigned int property_tag = 0; property_bit_vector; property_bit_vector >>= 1) {
+    //        print_debug("property_tag");
+    //        property_tag += property_bit_vector & 1;
+    //    }
     
-//    unsigned int c; // c accumulates the total bits set in v
-//    for (c = 0; property_bit_vector; c++)
-//    {
-//        //        if (((property_bit_vector >> bit_set_count) & 1) != 0) {
-//        printf("%d\t\t\t%d\n-------------\n\n", c, (int)(property_bit_vector));
-//        property_bit_vector &= property_bit_vector - 1; // clear the least significant bit set
-//    }
+    //    unsigned int c; // c accumulates the total bits set in v
+    //    for (c = 0; property_bit_vector; c++)
+    //    {
+    //        //        if (((property_bit_vector >> bit_set_count) & 1) != 0) {
+    //        printf("%d\t\t\t%d\n-------------\n\n", c, (int)(property_bit_vector));
+    //        property_bit_vector &= property_bit_vector - 1; // clear the least significant bit set
+    //    }
     
     //    CaptureDeviceConfigurationControlPropertyBitVector property_bit_vector_temp = property_bit_vector;
     //    for (unsigned int bit_set_count = 0; property_bit_vector_temp; property_bit_vector_temp >>= 1) {
@@ -392,7 +388,7 @@ static uint8_t property_bit_vector_[5][3];
     UIButton * (^(^bg)(CaptureDeviceConfigurationControlProperty))(void) = button_group(property_bit_vector, selected_property_bit_vector, hidden_property_bit_vector);
     for (CaptureDeviceConfigurationControlProperty property = CaptureDeviceConfigurationControlPropertyTorchLevel; property < CaptureDeviceConfigurationControlPropertyNone; property++) {
         [self.view addSubview:bg(property)()];
-            [bg(property)() setCenter:CGPointMake(CGRectGetMidX(bg(property)().superview.frame), CGRectGetMidY(bg(property)().superview.frame) + (bg(property)().frame.size.height * property) + 13.0)];
+        [bg(property)() setCenter:CGPointMake(CGRectGetMidX(bg(property)().superview.frame), CGRectGetMidY(bg(property)().superview.frame) + (bg(property)().frame.size.height + bg(property)().intrinsicContentSize.height) * property)];
     }
 }
 
