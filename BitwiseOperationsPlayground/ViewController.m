@@ -249,8 +249,9 @@ static void (^print_debug)(const char *) = ^ (const char * str) {
 
 static const UIButton * (^buttons[5])(void);
 static const UIButton * (^(^(^button_group)(CaptureDeviceConfigurationControlPropertyBitMask, CaptureDeviceConfigurationControlSelectedPropertyBitMask, CaptureDeviceConfigurationControlHiddenPropertyBitMask))(CaptureDeviceConfigurationControlProperty))(void) =  ^ (CaptureDeviceConfigurationControlPropertyBitMask property_bit_mask, CaptureDeviceConfigurationControlSelectedPropertyBitMask selected_property_bit_mask, CaptureDeviceConfigurationControlHiddenPropertyBitMask hidden_property_bit_mask) {
-    print_debug("INIT BUTTONS");
-    for (int property_tag = 0; property_tag < 5; property_tag++) {
+    for (unsigned int property_tag = 0; property_bit_vector; property_bit_vector >>= 1) {
+        printf("property_tag == %d\n", property_tag);
+        
         __block UIButton * (^button)(void);
         button = ^{
             print_debug("\t\tINIT BUTTON");
@@ -277,6 +278,8 @@ static const UIButton * (^(^(^button_group)(CaptureDeviceConfigurationControlPro
                 };
         }();
         buttons[property_tag] = button;
+        property_tag += property_bit_vector & 1;
+        
     }
     print_debug("");
     
@@ -360,13 +363,19 @@ static uint8_t property_bit_vector_[5][3];
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    unsigned int c; // c accumulates the total bits set in v
-    for (c = 0; property_bit_vector; c++)
-    {
-        //        if (((property_bit_vector >> bit_set_count) & 1) != 0) {
-        printf("%d\t\t\t%d\n-------------\n\n", c, (int)(property_bit_vector));
-        property_bit_vector &= property_bit_vector - 1; // clear the least significant bit set
-    }
+//    print_debug("Reading property_bit_vector...");
+//    for (unsigned int property_tag = 0; property_bit_vector; property_bit_vector >>= 1) {
+//        print_debug("property_tag");
+//        property_tag += property_bit_vector & 1;
+//    }
+    
+//    unsigned int c; // c accumulates the total bits set in v
+//    for (c = 0; property_bit_vector; c++)
+//    {
+//        //        if (((property_bit_vector >> bit_set_count) & 1) != 0) {
+//        printf("%d\t\t\t%d\n-------------\n\n", c, (int)(property_bit_vector));
+//        property_bit_vector &= property_bit_vector - 1; // clear the least significant bit set
+//    }
     
     //    CaptureDeviceConfigurationControlPropertyBitVector property_bit_vector_temp = property_bit_vector;
     //    for (unsigned int bit_set_count = 0; property_bit_vector_temp; property_bit_vector_temp >>= 1) {
