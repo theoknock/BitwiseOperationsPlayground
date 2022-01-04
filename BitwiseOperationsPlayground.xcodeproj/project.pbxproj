@@ -23,7 +23,7 @@
 		B9B9A2DD2782519A001A8449 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
 		B9B9A2DE2782519A001A8449 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
 		B9B9A2E02782519A001A8449 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		B9B9A2E12782519A001A8449 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		B9B9A2E12782519A001A8449 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; wrapsLines = 0; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		B9B9A2E42782519A001A8449 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B9B9A2E62782519D001A8449 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B9B9A2E92782519D001A8449 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -67,11 +67,11 @@
 				B9B9A2DE2782519A001A8449 /* SceneDelegate.m */,
 				B9B9A2E02782519A001A8449 /* ViewController.h */,
 				B9B9A2E12782519A001A8449 /* ViewController.m */,
-				B9B9A2E32782519A001A8449 /* Main.storyboard */,
-				B9B9A2E62782519D001A8449 /* Assets.xcassets */,
-				B9B9A2E82782519D001A8449 /* LaunchScreen.storyboard */,
 				B9B9A2EB2782519D001A8449 /* Info.plist */,
 				B9B9A2EC2782519D001A8449 /* main.m */,
+				B9B9A2E32782519A001A8449 /* Main.storyboard */,
+				B9B9A2E82782519D001A8449 /* LaunchScreen.storyboard */,
+				B9B9A2E62782519D001A8449 /* Assets.xcassets */,
 			);
 			path = BitwiseOperationsPlayground;
 			sourceTree = "<group>";
