@@ -322,35 +322,20 @@ static const UIButton * (^(^(^button_group)(CaptureDeviceConfigurationControlPro
             [button setTitle:[NSString stringWithFormat:@"%d - %d", (selected_property_bit_vector | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)),
                                                                     (hidden_property_bit_vector   | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag))] forState:UIControlStateNormal];
             [button sizeToFit];
+            [[button titleLabel] setAdjustsFontSizeToFitWidth:CGRectGetWidth([[button titleLabel] frame])];
             [button setUserInteractionEnabled:TRUE];
             
             void (^eventHandlerBlock)(void) = ^{
-                //Possible selected/hidden bit\ pairs:
-                // 0/1/0 // 0/0/1 // 1/0/0   01 --> 01
-                // 1/0/0 // 0/1/0 // 0/0/1   10 --> 10
-                
-                //                           10 --> 01
-                //                              --> 10
-//                selected_property_bit_vector   = selected_property_bit_vector & 0;
-//                selected_property_bit_vector   = selected_property_bit_vector | property_tag;
                 selected_property_bit_vector &= ~(selected_property_bit_vector);
                 selected_property_bit_vector |= property_tag;
-                
-//                hidden_property_bit_vector = rotl8(selected_property_bit_vector, 1);
-//                hidden_property_bit_vector ^= (~selected_property_bit_vector &= ~(1 << property_tag));
-//                selected_property_bit_vector & = ~selected_property_bit_vector'
-                // toggle hidden bits = hidden_property_bit_vector ^
-                // exclude selected bit from toggle = ~selected_property_bit_vector */
                 for (int property = 0; property < 5; property++) {
                     [buttons[property]() setTitle:[NSString stringWithFormat:@"%d - %d", ((BOOL)((selected_property_bit_vector | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)) == (CaptureDeviceConfigurationControlSelectedPropertyBit)(property))) ? 1 : 0,
-                                                                            ((BOOL)((hidden_property_bit_vector   | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)) != (CaptureDeviceConfigurationControlSelectedPropertyBit)(property))) ? 1 : 0] forState:UIControlStateNormal];
+                                                   ((BOOL)((hidden_property_bit_vector   | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)) != (CaptureDeviceConfigurationControlSelectedPropertyBit)(property))) ? 1 : 0] forState:(property == property_tag) ? UIControlStateSelected : UIControlStateNormal];
                     [buttons[property]() setSelected:(selected_property_bit_vector | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)) == (CaptureDeviceConfigurationControlSelectedPropertyBit)(property)];
- // (property == button.tag)];
-//                    [buttons[property]() setHidden:(selected_property_bit_vector & (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)) == (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)];  // ([buttons[property]() isSelected]) ? FALSE : ([buttons[property]() isHidden]) ? FALSE : TRUE];
-                    // If this button is not selected && the button is hidden, show it; else, hide it
-                    // inverse of selected bit vector
-                    // If this button is selected, show it
-//                    [buttons[property]() setHidden:(hidden_property_bit_vector >>=  (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)) != (CaptureDeviceConfigurationControlSelectedPropertyBit)(property)];
+//                    [buttons[property]() setHidden:((BOOL)((hidden_property_bit_vector   | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)) != (CaptureDeviceConfigurationControlSelectedPropertyBit)(property))) ? 1 : 0];
+                    
+                    
+                    
                 };
             };
             objc_setAssociatedObject(button, @selector(invoke), eventHandlerBlock, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
