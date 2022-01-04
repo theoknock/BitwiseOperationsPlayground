@@ -133,7 +133,7 @@ typedef NS_OPTIONS(uint8_t, CaptureDeviceConfigurationControlSelectedPropertyBit
 };
 typedef CaptureDeviceConfigurationControlSelectedPropertyBit               CaptureDeviceConfigurationControlSelectedPropertyBitMask;
 typedef CaptureDeviceConfigurationControlSelectedPropertyBitMask           CaptureDeviceConfigurationControlSelectedPropertyBitVector;
-static  CaptureDeviceConfigurationControlSelectedPropertyBitVector         selected_property_bit_vector     = (0 << 0 | 1 << 1 | 0 << 2 | 0 << 3 | 0 << 4);
+static  CaptureDeviceConfigurationControlSelectedPropertyBitVector         selected_property_bit_vector     = (0 << 0 | 0 << 1 | 0 << 2 | 0 << 3 | 0 << 4);
 static  CaptureDeviceConfigurationControlSelectedPropertyBitVector * const selected_property_bit_vector_ptr = &selected_property_bit_vector;
 
 typedef NS_OPTIONS(uint8_t, CaptureDeviceConfigurationControlHiddenPropertyBit) {
@@ -145,7 +145,7 @@ typedef NS_OPTIONS(uint8_t, CaptureDeviceConfigurationControlHiddenPropertyBit) 
 };
 typedef CaptureDeviceConfigurationControlHiddenPropertyBit               CaptureDeviceConfigurationControlHiddenPropertyBitMask;
 typedef CaptureDeviceConfigurationControlHiddenPropertyBitMask           CaptureDeviceConfigurationControlHiddenPropertyBitVector;
-static  CaptureDeviceConfigurationControlHiddenPropertyBitVector         hidden_property_bit_vector     = 0;
+static  CaptureDeviceConfigurationControlHiddenPropertyBitVector         hidden_property_bit_vector     = (0 << 0 | 0 << 1 | 0 << 2 | 0 << 3 | 0 << 4);
 static  CaptureDeviceConfigurationControlHiddenPropertyBitVector * const hidden_property_bit_vector_ptr = &hidden_property_bit_vector;
 
 /* Possible bit masks
@@ -286,10 +286,6 @@ static UIImage * (^CaptureDeviceConfigurationControlPropertySymbolImage)(Capture
     return [UIImage systemImageNamed:CaptureDeviceConfigurationControlPropertySymbol(property, state) withConfiguration:CaptureDeviceConfigurationControlPropertySymbolImageConfiguration(state)];
 };
 
-static void (^print_debug)(const char *) = ^ (const char * str) {
-    static int counter;
-    printf("\n%d\t%s\n", ++counter, str);
-};
 
 static inline uint8_t rotl8 (uint8_t n, unsigned int c)
 {
@@ -309,7 +305,22 @@ static inline uint32_t rotr32 (uint32_t n, unsigned int c)
   return (n>>c) | (n<<( (-c)&mask ));
 }
 
+int conditional(int x, int y, int z) {
+  return ((((!x)<<31)>>31) & z) + ((((!(!x))<<31)>>31) & y);
+}
+
 uint8_t mask[8] = {1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5};
+
+int getByte(int x, int n) {
+  return (x >> (n<<5)) & 0xff;
+}
+
+static void (^print_byte)(CaptureDeviceConfigurationControlPropertyBitVector, CaptureDeviceConfigurationControlPropertyBit) = ^ (CaptureDeviceConfigurationControlPropertyBitVector bit_vector, CaptureDeviceConfigurationControlPropertyBit bit) {
+    
+    printf("\n\t%d\n", ((BOOL)(getByte(bit_vector, bit) & mask[bit]) ? 1 : 0));
+};
+
+
 static const UIButton * (^buttons[5])(void);
 static const UIButton * (^(^(^button_group)(CaptureDeviceConfigurationControlPropertyBitMask, CaptureDeviceConfigurationControlSelectedPropertyBitMask, CaptureDeviceConfigurationControlHiddenPropertyBitMask))(CaptureDeviceConfigurationControlProperty))(void) =  ^ (CaptureDeviceConfigurationControlPropertyBitMask property_bit_mask, CaptureDeviceConfigurationControlSelectedPropertyBitMask selected_property_bit_mask, CaptureDeviceConfigurationControlHiddenPropertyBitMask hidden_property_bit_mask) {
     for (unsigned int property_tag = 0; property_bit_vector; property_bit_vector >>= 1) {
@@ -321,30 +332,39 @@ static const UIButton * (^(^(^button_group)(CaptureDeviceConfigurationControlPro
             [button setImage:[UIImage systemImageNamed:CaptureDeviceConfigurationControlPropertyImageNames[0][property_tag] withConfiguration:CaptureDeviceConfigurationControlPropertySymbolImageConfiguration(CaptureDeviceConfigurationControlStateDeselected)] forState:UIControlStateNormal];
             [button setImage:[UIImage systemImageNamed:CaptureDeviceConfigurationControlPropertyImageNames[1][property_tag] withConfiguration:CaptureDeviceConfigurationControlPropertySymbolImageConfiguration(CaptureDeviceConfigurationControlStateSelected)] forState:UIControlStateSelected];
             [button setTitle:[NSString stringWithFormat:@"%d - %d",
-                              (BOOL)(selected_property_bit_vector & mask[property_tag]), //(selected_property_bit_vector | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)),
-                              (BOOL)(hidden_property_bit_vector   & mask[property_tag])] forState:UIControlStateNormal];
+                              (BOOL)(getByte(selected_property_bit_vector, property_tag) & mask[property_tag]), //(selected_property_bit_vector | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)),
+                              (BOOL)(getByte(hidden_property_bit_vector,   property_tag) & mask[property_tag])] forState:UIControlStateNormal];
             [button sizeToFit];
             [[button titleLabel] setAdjustsFontSizeToFitWidth:CGRectGetWidth([[button titleLabel] frame])];
+
             [button setUserInteractionEnabled:TRUE];
             
             void (^eventHandlerBlock)(void) = ^{
+                printf("\n\n%d-----------%d-------------%d\n", property_tag, property_tag, property_tag);
+                print_byte(selected_property_bit_vector, buttons[property_tag]().tag);
                 selected_property_bit_vector &= ~(selected_property_bit_vector);
+                print_byte(selected_property_bit_vector, buttons[property_tag]().tag);
                 selected_property_bit_vector |= mask[property_tag];
+                print_byte(selected_property_bit_vector, buttons[property_tag]().tag);
+                printf("\n%d-----------%d-------------%d\n\n", property_tag, property_tag, property_tag);
+                hidden_property_bit_vector ^= ~((selected_property_bit_vector & getByte(selected_property_bit_vector, property_tag)));
                 for (int property = 0; property < 5; property++) {
-                    BOOL hide = (BOOL)(hidden_property_bit_vector & mask[property_tag]) ? 1 : 0;
-                    [buttons[property]() setTitle:[NSString stringWithFormat:@"%d - %d", (BOOL)(selected_property_bit_vector & mask[buttons[property]().tag]), hide] forState:(property == property_tag) ? UIControlStateSelected : UIControlStateNormal];
-                    [buttons[property]() setSelected:(BOOL)(selected_property_bit_vector & mask[buttons[property]().tag])]; //(selected_property_bit_vector | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)),
+                    [buttons[property]() setTitle:[NSString stringWithFormat:@"%d - %d",
+                                                   (BOOL)(getByte(selected_property_bit_vector, property_tag) & mask[buttons[property]().tag]), //(selected_property_bit_vector | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)),
+                                                   (BOOL)(getByte(hidden_property_bit_vector,   property_tag) & mask[buttons[property]().tag])] forState:UIControlStateNormal];
+                    [buttons[property]() setSelected:(BOOL)(getByte(selected_property_bit_vector, property_tag) & mask[buttons[property]().tag])]; //(selected_property_bit_vector | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)),
                      
-//                    [buttons[property]() setHidden:((BOOL)((hidden_property_bit_vector   | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)) != (CaptureDeviceConfigurationControlSelectedPropertyBit)(property))) ? 1 : 0];
-                    
-                    
-                    
+//                    [buttons[property]() setHidden:(BOOL)(getByte(selected_property_bit_vector, property_tag) & mask[buttons[property]().tag]) &
+//                                                   (BOOL)!(getByte(hidden_property_bit_vector, property_tag) & mask[buttons[property]().tag])];
+
                 };
             };
             objc_setAssociatedObject(button, @selector(invoke), eventHandlerBlock, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             [button addTarget:eventHandlerBlock action:@selector(invoke) forControlEvents:UIControlEventTouchUpInside];
             
             return ^ UIButton * (void) {
+                [button setSelected:(BOOL)(getByte(selected_property_bit_vector, property_tag) & mask[button.tag])]; //(selected_property_bit_vector | (CaptureDeviceConfigurationControlSelectedPropertyBit)(property_tag)),
+                    [button setHidden:(BOOL)(getByte(hidden_property_bit_vector, property_tag) & mask[button.tag])];
                 return button;
             };
         }();

@@ -6,6 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
+@import Accelerate;
 
 #include <limits.h>        /* for CHAR_BIT */
 #include <stdio.h>

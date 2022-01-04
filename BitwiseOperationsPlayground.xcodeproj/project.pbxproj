@@ -14,6 +14,7 @@
 		B9B9A2E72782519D001A8449 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9B9A2E62782519D001A8449 /* Assets.xcassets */; };
 		B9B9A2EA2782519D001A8449 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B9B9A2E82782519D001A8449 /* LaunchScreen.storyboard */; };
 		B9B9A2ED2782519D001A8449 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B9B9A2EC2782519D001A8449 /* main.m */; };
+		B9E7A5A42784AC3B006D7A15 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9E7A5A32784AC3B006D7A15 /* Accelerate.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 		B9B9A2E92782519D001A8449 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B9B9A2EB2782519D001A8449 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B9B9A2EC2782519D001A8449 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		B9E7A5A32784AC3B006D7A15 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +38,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9E7A5A42784AC3B006D7A15 /* Accelerate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +50,7 @@
 			children = (
 				B9B9A2D92782519A001A8449 /* BitwiseOperationsPlayground */,
 				B9B9A2D82782519A001A8449 /* Products */,
+				B9E7A5A22784AC3A006D7A15 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -74,6 +78,14 @@
 				B9B9A2E62782519D001A8449 /* Assets.xcassets */,
 			);
 			path = BitwiseOperationsPlayground;
+			sourceTree = "<group>";
+		};
+		B9E7A5A22784AC3A006D7A15 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B9E7A5A32784AC3B006D7A15 /* Accelerate.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
